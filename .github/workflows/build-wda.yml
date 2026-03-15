@@ -32,7 +32,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             ARCHS=arm64
 
-      - name: Strip XCTest frameworks and Package WDA
+      - name: Package WDA
         run: |
           WDA_PATH=$(find ./build -name "WebDriverAgentRunner-Runner.app" -type d | head -1)
           echo "Found WDA at: $WDA_PATH"
@@ -42,21 +42,11 @@ jobs:
             exit 1
           fi
 
-          # Remove embedded XCTest frameworks (required for iOS 17+)
-          echo "Removing XCTest frameworks..."
-          rm -rf "$WDA_PATH/Frameworks/XCTest.framework"
-          rm -rf "$WDA_PATH/Frameworks/XCTAutomationSupport.framework"
-          rm -rf "$WDA_PATH/Frameworks/XCUIAutomation.framework"
-          rm -rf "$WDA_PATH/Frameworks/Testing.framework"
-          rm -f "$WDA_PATH/Frameworks/libXCTestSwiftSupport.dylib"
-          echo "Remaining frameworks:"
+          echo "Frameworks included:"
           ls -la "$WDA_PATH/Frameworks/" || echo "No frameworks dir"
 
-          # Show bundle IDs for verification
           echo "Runner bundle ID:"
           /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$WDA_PATH/Info.plist"
-          echo "XCTest plugin bundle ID:"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$WDA_PATH/PlugIns/WebDriverAgentRunner.xctest/Info.plist"
 
           mkdir -p Payload
           cp -r "$WDA_PATH" Payload/
